@@ -858,3 +858,22 @@ async def show_stats(query: Update.callback_query, lang: str) -> None:
     except Exception as e:
         logger.error(f"Error showing stats: {e}")
         await query.edit_message_text(_("❌ Error: {}").format(str(e)))
+
+
+async def show_charts_menu(query: Update.callback_query, lang: str) -> None:
+    """Show charts menu."""
+    _ = get_translation(lang)
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("SELECT id, name FROM habits WHERE is_active = 1")
+        habits = await cursor.fetchall()
+
+    if not habits:
+        message = _("📈 No habits for charts.\n\nCreate your first habit!")
+        keyboard = [[InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(message, reply_markup=reply_markup)
+        return
+
+    message = _("📈 Progress Charts\n\nSelect a habit or view overview:")
+    reply_markup = await get_charts_keyboard(lang)
+    await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
