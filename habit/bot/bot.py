@@ -116,3 +116,14 @@ def get_main_menu_keyboard(lang: str = DEFAULT_LANGUAGE) -> InlineKeyboardMarkup
         [InlineKeyboardButton(_("Help"), callback_data="show_help")],
     ]
     return InlineKeyboardMarkup(keyboard)
+
+
+def get_language_keyboard() -> InlineKeyboardMarkup:
+    """Create language selection keyboard."""
+    _ = get_translation(DEFAULT_LANGUAGE)
+    keyboard = [
+        [InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")],
+        [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")],
+    ]
+    logger.info(f"Language keyboard created: {keyboard}")
+    return InlineKeyboardMarkup(keyboard)
