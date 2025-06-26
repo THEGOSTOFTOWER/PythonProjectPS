@@ -494,12 +494,14 @@ async def handle_language_selection(query: Update.callback_query, user_id: int, 
     await query.edit_message_text(message, reply_markup=reply_markup)
     logger.info(f"User {user_id} selected language: {new_lang}")
 
+
 async def show_main_menu(query: Update.callback_query, lang: str) -> None:
     """Show main menu."""
     _ = get_translation(lang)
     message = _("🎯 Habit Tracker - Main Menu\n\nChoose an action:")
     reply_markup = get_main_menu_keyboard(lang)
     await query.edit_message_text(message, reply_markup=reply_markup)
+
 
 async def show_habits(query: Update.callback_query, lang: str) -> None:
     """Show active habits."""
@@ -537,4 +539,18 @@ async def show_habits(query: Update.callback_query, lang: str) -> None:
 
     message += _("Click a habit to mark it as completed:")
     reply_markup = await get_habits_keyboard(lang)
+    await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+
+
+async def start_create_habit(query: Update.callback_query, user_id: int, lang: str) -> None:
+    """Start habit creation process."""
+    _ = get_translation(lang)
+    user_states[user_id] = {"step": "name", "lang": lang}
+    message = _(
+        "➕ Create a new habit\n\n"
+        "📖 **Step 1/3**: Enter the habit name\n\n"
+        "Examples:\n• Morning exercise\n• Reading\n• Meditation"
+    )
+    keyboard = [[InlineKeyboardButton(_("Cancel"), callback_data="main_menu")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
