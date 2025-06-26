@@ -55,3 +55,25 @@ class TestHabitBotFunctions(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(keyboard.inline_keyboard), 2)
         self.assertIn("🇷🇺", keyboard.inline_keyboard[0][0].text)
         self.assertIn("🇬🇧", keyboard.inline_keyboard[1][0].text)
+
+    @patch("aiosqlite.connect")
+    async def test_start_command_for_new_user_shows_language_keyboard(self, mock_connect):
+        """Проверяет поведение /start для нового пользователя."""
+        mock_conn = AsyncMock()
+        mock_connect.return_value.__aenter__.return_value = mock_conn
+        mock_cursor = AsyncMock()
+        mock_cursor.fetchone = AsyncMock(return_value=None)
+        mock_conn.execute.return_value = mock_cursor
+
+        mock_update = MagicMock()
+        mock_update.effective_user.id = 123
+        mock_update.effective_user.first_name = "Юра"
+        mock_update.message.reply_text = AsyncMock()
+
+        mock_context = MagicMock()
+
+        await start_command(mock_update, mock_context)
+
+        mock_update.message.reply_text.assert_awaited_once()
+        args, kwargs = mock_update.message.reply_text.call_args
+        self.assertIn("🌐", args[0])  # сообщение для нового пользователя
