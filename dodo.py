@@ -47,3 +47,17 @@ def task_html():
             "actions": ["sphinx-build -M html source habit/docs"],
             'task_dep': ['il8n']
     }
+
+def task_sdist():
+    """Create source distribution."""
+    return {
+            'actions': ['python -m build -s']
+           }
+
+
+def task_wheel():
+    """Create binary wheel distribution."""
+    return {
+            'actions': ['python -m build -w'],
+            'task_dep': ['html'],
+           }
