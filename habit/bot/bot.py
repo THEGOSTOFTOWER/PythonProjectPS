@@ -240,4 +240,33 @@ async def calculate_habit_stats(habit_id: str, habit_name: str, lang: str = DEFA
         "longest_streak": longest_streak,
         "last_completion": last_completion,
     }
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle /start command."""
+    user_id = update.effective_user.id
+    lang = await get_user_language(user_id)
+    _ = get_translation(lang)
+
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("SELECT language FROM users WHERE user_id = ?", (user_id,))
+        user_exists = await cursor.fetchone()
+
+    if not user_exists:
+        message = _(
+            "🌐 Welcome to Habit Tracker!\n\n"
+            "Please select your preferred language:"
+        )
+        reply_markup = get_language_keyboard()
+        await update.message.reply_text(message, reply_markup=reply_markup)
+        logger.info(f"Displayed language selection for new user {user_id}")
+    else:
+        user_name = update.effective_user.first_name or _("Friend")
+        message = _(
+            "🎯 Hello, {}! Welcome to Habit Tracker!\n\n"
+            "Track your habits with analytics and charts.\n"
+            "Choose an action:"
+        ).format(user_name)
+        reply_markup = get_main_menu_keyboard(lang)
+        await update.message.reply_text(message, reply_markup=reply_markup)
+        logger.info(f"Displayed main menu for user {user_id}")
+
 
