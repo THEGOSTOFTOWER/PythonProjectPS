@@ -32,3 +32,11 @@ def task_mo():
             'targets': [f'{PODEST}/ru/LC_MESSAGES/messages.mo'],
             'task_dep': ['po']
            }
+
+def task_il8n():
+    """Build il8n"""
+    return {
+            "file_dep": [f'{PODEST}/ru/LC_MESSAGES/messages.po'],
+            "actions": None,
+            'task_dep': ['mo']
+    }
