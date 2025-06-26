@@ -13,3 +13,9 @@ def task_pot():
         'actions': [f'pybabel extract -o {PODEST}/messages.pot habit/bot'],
         'targets': [f"{PODEST}/messages.pot"],
     }
+
+def task_po():
+    return {
+        'actions': [f"pybabel update -l ru -D messages -i {PODEST}/messages.pot -d {PODEST}"],
+
+    }
