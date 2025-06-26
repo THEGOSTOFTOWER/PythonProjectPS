@@ -270,3 +270,33 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         logger.info(f"Displayed main menu for user {user_id}")
 
 
+
+_translations: Dict[str, gettext.GNUTranslations] = {}
+
+
+def get_translation(lang: str) -> callable:
+    """Get translation function for the specified language."""
+    # Clear cache for the language to force reload (for debugging)
+    if lang in _translations:
+        logger.info(f"Clearing translation cache for language: {lang}")
+        del _translations[lang]
+
+    try:
+        logger.info(f"Attempting to load translation for language: {lang}")
+        _translations[lang] = gettext.translation(
+            "messages", "locale", languages=[lang]
+        )
+        logger.info(f"Successfully loaded translation for {lang}")
+    except FileNotFoundError as e:
+        logger.error(f"Translation file for {lang} not found: {e}")
+        logger.warning(f"Falling back to English for language: {lang}")
+        _translations[lang] = gettext.translation(
+            "messages", "locale", languages=["en"], fallback=True
+        )
+    except Exception as e:
+        logger.error(f"Error loading translation for {lang}: {e}")
+        logger.warning(f"Falling back to English for language: {lang}")
+        _translations[lang] = gettext.translation(
+            "messages", "locale", languages=["en"], fallback=True
+        )
+    return _translations[lang].gettext
