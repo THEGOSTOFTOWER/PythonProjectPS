@@ -320,3 +320,13 @@ async def handle_language_selection(query: Update.callback_query, user_id: int, 
     logger.info(f"User {user_id} selected language: {new_lang}")
     # Debug: Log the translated main menu buttons
     logger.info(f"Main menu buttons for {new_lang}: {[button.text for row in reply_markup.inline_keyboard for button in row]}")
+
+async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Handle /language command."""
+        user_id = update.effective_user.id
+        lang = await get_user_language(user_id)
+        _ = get_translation(lang)
+        message = _("🌐 Select your preferred language:")
+        reply_markup = get_language_keyboard()
+        await update.message.reply_text(message, reply_markup=reply_markup)
+        logger.info(f"Displayed language selection for user {user_id}")
