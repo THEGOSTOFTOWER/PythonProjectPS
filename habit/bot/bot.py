@@ -803,3 +803,58 @@ async def complete_habit(query: Update.callback_query, lang: str) -> None:
     except Exception as e:
         logger.error(f"Error completing habit {habit_id}: {e}")
         await query.edit_message_text(_("❌ Error: {}").format(str(e)))
+
+
+async def show_stats(query: Update.callback_query, lang: str) -> None:
+    """Show habit statistics."""
+    _ = get_translation(lang)
+    try:
+        async with aiosqlite.connect(DB_PATH) as db:
+            cursor = await db.execute("SELECT id, name FROM habits WHERE is_active = 1")
+            habits = await cursor.fetchall()
+
+        if not habits:
+            message = _("📊 No habits available.\n\nCreate your first habit!")
+            keyboard = [[InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(message, reply_markup=reply_markup)
+            return
+
+        message = _("📊 Habit Statistics:\n\n")
+        total_completions = total_current_streak = habits_completed_today = 0
+        today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+
+        async with aiosqlite.connect(DB_PATH) as db:
+            for i, (habit_id, name) in enumerate(habits, 1):
+                stats = await calculate_habit_stats(habit_id, name, lang)
+                cursor = await db.execute(
+                    "SELECT 1 FROM completions WHERE habit_id = ? AND completed_at >= ? AND completed_at < ?",
+                    (habit_id, today_start.isoformat(), today_end.isoformat())
+                )
+                if await cursor.fetchone():
+                    habits_completed_today += 1
+
+                message += f"{i}. **{name}**\n"
+                message += f"✅ {_('Completions')}: {stats['total_completions']}\n"
+                message += f"🔥 {_('Streak')}: {stats['current_streak']} {_('days')}\n"
+                message += f"🏆 {_('Longest')}: {stats['longest_streak']} {_('days')}\n"
+                message += f"📈 {_('Rate')}: {stats['completion_rate']:.1f}% (30 {_('days')})\n"
+                if stats["last_completion"]:
+                    message += f"📆 {_('Last')}: {stats['last_completion'].strftime('%d.%m.%Y')}\n"
+                message += "\n"
+                total_completions += stats["total_completions"]
+                total_current_streak += stats["current_streak"]
+
+        message += f"📈 {_('Overall')}:\n"
+        message += f"📝 {_('Habits')}: {len(habits)}\n"
+        message += f"✅ {_('Today')}: {habits_completed_today}/{len(habits)}\n"
+        message += f"🎯 {_('Total')}: {total_completions}\n"
+        message += f"🔥 {_('Streaks')}: {total_current_streak} {_('days')}\n"
+
+        keyboard = [[InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+    except Exception as e:
+        logger.error(f"Error showing stats: {e}")
+        await query.edit_message_text(_("❌ Error: {}").format(str(e)))
