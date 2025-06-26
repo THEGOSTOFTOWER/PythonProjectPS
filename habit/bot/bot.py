@@ -493,3 +493,11 @@ async def handle_language_selection(query: Update.callback_query, user_id: int, 
     reply_markup = get_main_menu_keyboard(new_lang)
     await query.edit_message_text(message, reply_markup=reply_markup)
     logger.info(f"User {user_id} selected language: {new_lang}")
+
+async def show_main_menu(query: Update.callback_query, lang: str) -> None:
+    """Show main menu."""
+    _ = get_translation(lang)
+    message = _("🎯 Habit Tracker - Main Menu\n\nChoose an action:")
+    reply_markup = get_main_menu_keyboard(lang)
+    await query.edit_message_text(message, reply_markup=reply_markup)
+
