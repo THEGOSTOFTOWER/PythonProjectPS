@@ -476,3 +476,20 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     except Exception as e:
         logger.error(f"Error in button_callback: {e}")
         await query.message.reply_text(_("❌ Error: {}").format(str(e)))
+
+
+async def handle_language_selection(query: Update.callback_query, user_id: int, lang: str) -> None:
+    """Handle language selection."""
+    _ = get_translation(lang)
+    new_lang = query.data.replace("lang_", "")
+    await set_user_language(user_id, new_lang)
+    _ = get_translation(new_lang)  # Update translation
+    user_name = query.from_user.first_name or _("Friend")
+    message = _(
+        "🎯 Hello, {}! Language set to {}.\n\n"
+        "Track your habits with analytics and charts.\n"
+        "Choose an action:"
+    ).format(user_name, _("English") if new_lang == "en" else _("Русский"))
+    reply_markup = get_main_menu_keyboard(new_lang)
+    await query.edit_message_text(message, reply_markup=reply_markup)
+    logger.info(f"User {user_id} selected language: {new_lang}")
