@@ -924,3 +924,27 @@ async def send_chart(query: Update.callback_query, lang: str) -> None:
     except Exception as e:
         logger.error(f"Error generating chart: {e}")
         await query.edit_message_text(_("❌ Error: {}").format(str(e)))
+
+
+async def show_help(query: Update.callback_query, lang: str) -> None:
+    """Show help message."""
+    _ = get_translation(lang)
+    message = _(
+        "🆘 Habit Tracker Help\n\n"
+        "📖 Track habits with analytics and charts.\n\n"
+        "🚀 Features:\n"
+        "• Create habits\n"
+        "• Track completions\n"
+        "• View stats\n"
+        "• Generate charts\n\n"
+        "📱 Commands:\n"
+        "/start - Start bot\n"
+        "/language - Change language\n\n"
+        "💡 Tips:\n"
+        "• Mark habits daily\n"
+        "• Use charts for motivation\n\n"
+        "Good luck! 🚀"
+    )
+    keyboard = [[InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
