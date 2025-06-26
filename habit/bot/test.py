@@ -26,3 +26,14 @@ class TestHabitBotFunctions(unittest.IsolatedAsyncioTestCase):
             (12345, "ru")
         )
         mock_conn.commit.assert_awaited_once()
+
+    @patch("aiosqlite.connect")
+    async def test_get_charts_keyboard_returns_markup(self, mock_connect):
+        """Проверяет, что клавиатура с графиками возвращается при наличии привычек."""
+        mock_conn = AsyncMock()
+        mock_connect.return_value.__aenter__.return_value = mock_conn
+        mock_conn.execute.return_value.fetchall = AsyncMock(return_value=[(1, "Exercise"), (2, "Read")])
+
+        markup = await get_charts_keyboard("en")
+        self.assertIsInstance(markup, InlineKeyboardMarkup)
+        self.assertEqual(len(markup.inline_keyboard), 4)  # 2 привычки + 2 кнопки внизу
