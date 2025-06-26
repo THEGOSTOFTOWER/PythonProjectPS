@@ -877,3 +877,50 @@ async def show_charts_menu(query: Update.callback_query, lang: str) -> None:
     message = _("📈 Progress Charts\n\nSelect a habit or view overview:")
     reply_markup = await get_charts_keyboard(lang)
     await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+
+
+async def send_chart(query: Update.callback_query, lang: str) -> None:
+    """Send habit or overview chart."""
+    _ = get_translation(lang)
+    try:
+        if query.data == "chart_all":
+            chart_buffer = await generate_overview_chart(lang)
+            if chart_buffer:
+                await query.message.reply_photo(
+                    photo=chart_buffer,
+                    caption=_("📊 Overview of all habits\n\nShows completion rates and streaks.")
+                )
+            else:
+                await query.edit_message_text(_("❌ Unable to generate chart"))
+        else:
+            habit_id = query.data.replace("chart_", "")
+            async with aiosqlite.connect(DB_PATH) as db:
+                cursor = await db.execute("SELECT name FROM habits WHERE id = ?", (habit_id,))
+                habit = await cursor.fetchone()
+            if not habit:
+                await query.edit_message_text(_("❌ Habit not found"))
+                return
+
+            chart_buffer = await generate_habit_chart(habit_id, lang=lang)
+            if chart_buffer:
+                stats = await calculate_habit_stats(habit_id, habit[0], lang)
+                caption = _(
+                    "📈 Chart for {}\n\n"
+                    "✅ Completions: {}\n"
+                    "🔥 Streak: {} days\n"
+                    "🏆 Longest: {} days\n"
+                    "📈 Rate: {:.1f}%"
+                ).format(
+                    habit[0], stats["total_completions"], stats["current_streak"],
+                    stats["longest_streak"], stats["completion_rate"]
+                )
+                await query.message.reply_photo(photo=chart_buffer, caption=caption, parse_mode="Markdown")
+            else:
+                await query.edit_message_text(_("❌ Unable to generate chart"))
+
+        keyboard = [[InlineKeyboardButton(_("Back to Charts"), callback_data="show_charts")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(_("📈 Chart sent above"), reply_markup=reply_markup)
+    except Exception as e:
+        logger.error(f"Error generating chart: {e}")
+        await query.edit_message_text(_("❌ Error: {}").format(str(e)))
