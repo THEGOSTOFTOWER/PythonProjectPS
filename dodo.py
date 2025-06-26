@@ -40,3 +40,10 @@ def task_il8n():
             "actions": None,
             'task_dep': ['mo']
     }
+
+def task_html():
+    """Build html"""
+    return {
+            "actions": ["sphinx-build -M html source habit/docs"],
+            'task_dep': ['il8n']
+    }
