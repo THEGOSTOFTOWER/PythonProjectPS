@@ -47,3 +47,11 @@ class TestHabitBotFunctions(unittest.IsolatedAsyncioTestCase):
 
         result = await get_charts_keyboard("en")
         self.assertIsNone(result)
+
+    def test_get_language_keyboard_structure(self):
+        """Проверяет, что клавиатура выбора языка содержит правильные кнопки."""
+        keyboard = get_language_keyboard()
+        self.assertIsInstance(keyboard, InlineKeyboardMarkup)
+        self.assertEqual(len(keyboard.inline_keyboard), 2)
+        self.assertIn("🇷🇺", keyboard.inline_keyboard[0][0].text)
+        self.assertIn("🇬🇧", keyboard.inline_keyboard[1][0].text)
