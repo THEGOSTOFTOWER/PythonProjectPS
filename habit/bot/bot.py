@@ -501,3 +501,40 @@ async def show_main_menu(query: Update.callback_query, lang: str) -> None:
     reply_markup = get_main_menu_keyboard(lang)
     await query.edit_message_text(message, reply_markup=reply_markup)
 
+async def show_habits(query: Update.callback_query, lang: str) -> None:
+    """Show active habits."""
+    _ = get_translation(lang)
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute(
+            "SELECT id, name, description, frequency, created_at FROM habits WHERE is_active = 1"
+        )
+        habits = await cursor.fetchall()
+
+    if not habits:
+        message = _("📝 No active habits.\n\nCreate your first habit!")
+        keyboard = [[InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(message, reply_markup=reply_markup)
+        return
+
+    message = _("📋 Your active habits:\n\n")
+    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    async with aiosqlite.connect(DB_PATH) as db:
+        for habit_id, name, description, frequency, created_at in habits:
+            cursor = await db.execute(
+                "SELECT 1 FROM completions WHERE habit_id = ? AND completed_at >= ? AND completed_at < ?",
+                (habit_id, today_start.isoformat(), today_end.isoformat())
+            )
+            completed_today = await cursor.fetchone()
+            status = "✅" if completed_today else "⏳"
+            message += f"{status} **{name}**\n"
+            if description:
+                message += f"📝 {description}\n"
+            message += f"🔄 {_(frequency.capitalize())}\n"
+            message += f"📆 {_('Created')}: {datetime.fromisoformat(created_at).strftime('%d.%m.%Y')}\n\n"
+
+    message += _("Click a habit to mark it as completed:")
+    reply_markup = await get_habits_keyboard(lang)
+    await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
