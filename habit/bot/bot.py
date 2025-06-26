@@ -438,3 +438,41 @@ async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     reply_markup = get_language_keyboard()
     await update.message.reply_text(message, reply_markup=reply_markup)
     logger.info(f"Displayed language selection for user {user_id}")
+
+
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle button callbacks."""
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+    lang = await get_user_language(user_id)
+    _ = get_translation(lang)
+
+    logger.info(f"Callback query: {query.data} from user {user_id}")
+
+    try:
+        if query.data.startswith("lang_"):
+            await handle_language_selection(query, user_id, lang)
+        elif query.data == "main_menu":
+            await show_main_menu(query, lang)
+        elif query.data == "show_habits":
+            await show_habits(query, lang)
+        elif query.data == "create_habit":
+            await start_create_habit(query, user_id, lang)
+        elif query.data == "show_stats":
+            await show_stats(query, lang)
+        elif query.data == "show_charts":
+            await show_charts_menu(query, lang)
+        elif query.data == "show_help":
+            await show_help(query, lang)
+        elif query.data.startswith("complete_"):
+            await complete_habit(query, lang)
+        elif query.data.startswith("chart_"):
+            await send_chart(query, lang)
+        elif query.data.startswith("freq_"):
+            await handle_frequency_selection(query, user_id, lang)
+        elif query.data == "skip_description":
+            await skip_description(query, user_id, lang)
+    except Exception as e:
+        logger.error(f"Error in button_callback: {e}")
+        await query.message.reply_text(_("❌ Error: {}").format(str(e)))
