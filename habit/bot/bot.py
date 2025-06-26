@@ -194,3 +194,50 @@ async def set_user_language(user_id: int, lang: str) -> None:
     except Exception as e:
         logger.error(f"Error setting language for user {user_id}: {e}")
 
+async def calculate_habit_stats(habit_id: str, habit_name: str, lang: str = DEFAULT_LANGUAGE) -> Dict:
+    """Calculate habit statistics."""
+    _ = get_translation(lang)
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("SELECT completed_at FROM completions WHERE habit_id = ?", (habit_id,))
+        completions = await cursor.fetchall()
+
+    total_completions = len(completions)
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    recent_completions = [c for c in completions if datetime.fromisoformat(c[0]) > thirty_days_ago]
+    completion_rate = (len(recent_completions) / 30.0 * 100) if recent_completions else 0
+
+    completion_dates = sorted([datetime.fromisoformat(c[0]).date() for c in completions])
+    current_streak = longest_streak = 0
+
+    if completion_dates:
+        today = datetime.now().date()
+        current_date = today
+        for completion_date in reversed(completion_dates):
+            if completion_date == current_date or completion_date == current_date - timedelta(days=1):
+                current_streak += 1
+                current_date = completion_date
+            else:
+                break
+
+        temp_streak = 1
+        prev_date = completion_dates[0]
+        for completion_date in completion_dates[1:]:
+            if completion_date == prev_date + timedelta(days=1):
+                temp_streak += 1
+                longest_streak = max(longest_streak, temp_streak)
+            else:
+                temp_streak = 1
+            prev_date = completion_date
+
+    last_completion = datetime.fromisoformat(completions[-1][0]) if completions else None
+
+    return {
+        "habit_id": habit_id,
+        "habit_name": habit_name,
+        "total_completions": total_completions,
+        "completion_rate": completion_rate,
+        "current_streak": current_streak,
+        "longest_streak": longest_streak,
+        "last_completion": last_completion,
+    }
+
