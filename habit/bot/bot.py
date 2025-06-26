@@ -12,6 +12,7 @@ from typing import Dict, List, Optional
 import uuid
 import gettext
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -24,7 +25,6 @@ from telegram.ext import (
     filters,
     ContextTypes,
 )
-
 
 from telegram.error import BadRequest, TelegramError
 from dotenv import load_dotenv
@@ -84,15 +84,35 @@ async def init_db() -> None:
                 """
             )
         await conn.execute(
-                """
-                CREATE TABLE IF NOT EXISTS users (
-                    user_id INTEGER PRIMARY KEY,
-                    language TEXT NOT NULL DEFAULT 'ru'
-                )
-                """
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                language TEXT NOT NULL DEFAULT 'ru'
             )
-            await conn.commit()
-        logger.info("SQLite database initialized")
+            """
+        )
+        await conn.commit()
+    logger.info("SQLite database initialized")
     except Exception as e:
-        logger.error(f"Database initialization failed: {e}")
-        raise
+    logger.error(f"Database initialization failed: {e}")
+    raise
+
+# Global state for habit creation
+user_states: Dict[int, Dict[str, str]] = {}
+
+
+def get_main_menu_keyboard(lang: str = DEFAULT_LANGUAGE) -> InlineKeyboardMarkup:
+    """Create main menu keyboard."""
+    _ = get_translation(lang)
+    keyboard = [
+        [
+            InlineKeyboardButton(_("My Habits"), callback_data="show_habits"),
+            InlineKeyboardButton(_("Create Habit"), callback_data="create_habit"),
+        ],
+        [
+            InlineKeyboardButton(_("Statistics"), callback_data="show_stats"),
+            InlineKeyboardButton(_("Charts"), callback_data="show_charts"),
+        ],
+        [InlineKeyboardButton(_("Help"), callback_data="show_help")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
