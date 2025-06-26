@@ -138,3 +138,17 @@ def get_frequency_keyboard(lang: str = DEFAULT_LANGUAGE) -> InlineKeyboardMarkup
         [InlineKeyboardButton(_("Cancel"), callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
+
+async def get_habits_keyboard(lang: str = DEFAULT_LANGUAGE) -> Optional[InlineKeyboardMarkup]:
+    """Create keyboard with active habits."""
+    _ = get_translation(lang)
+    async with aiosqlite.connect(DB_PATH) as connection:
+        cursor = await connection.execute("SELECT id, name FROM habits WHERE is_active = 1")
+        habits = await cursor.fetchall()
+
+    if not habits:
+        return None
+
+    keyboard = [[InlineKeyboardButton(f"✅ {name}", callback_data=f"complete_{id}")] for id, name in habits]
+    keyboard.append([InlineKeyboardButton(_("Main Menu"), id="main_menu")])
+    return InlineKeyboardMarkup(keyboard)
