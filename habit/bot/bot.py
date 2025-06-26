@@ -97,6 +97,7 @@ async def init_db() -> None:
     logger.error(f"Database initialization failed: {e}")
     raise
 
+
 # Global state for habit creation
 user_states: Dict[int, Dict[str, str]] = {}
 
@@ -128,6 +129,7 @@ def get_language_keyboard() -> InlineKeyboardMarkup:
     logger.info(f"Language keyboard created: {keyboard}")
     return InlineKeyboardMarkup(keyboard)
 
+
 def get_frequency_keyboard(lang: str = DEFAULT_LANGUAGE) -> InlineKeyboardMarkup:
     """Create frequency selection keyboard."""
     _ = get_translation(lang)
@@ -138,6 +140,7 @@ def get_frequency_keyboard(lang: str = DEFAULT_LANGUAGE) -> InlineKeyboardMarkup
         [InlineKeyboardButton(_("Cancel"), callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
+
 
 async def get_habits_keyboard(lang: str = DEFAULT_LANGUAGE) -> Optional[InlineKeyboardMarkup]:
     """Create keyboard with active habits."""
@@ -181,6 +184,7 @@ async def get_user_language(user_id: int) -> str:
         logger.error(f"Error retrieving language for user {user_id}: {e}")
         return DEFAULT_LANGUAGE
 
+
 async def set_user_language(user_id: int, lang: str) -> None:
     """Set user's language."""
     try:
@@ -193,6 +197,7 @@ async def set_user_language(user_id: int, lang: str) -> None:
         logger.info(f"Set language for user {user_id} to {lang}")
     except Exception as e:
         logger.error(f"Error setting language for user {user_id}: {e}")
+
 
 async def calculate_habit_stats(habit_id: str, habit_name: str, lang: str = DEFAULT_LANGUAGE) -> Dict:
     """Calculate habit statistics."""
@@ -240,6 +245,63 @@ async def calculate_habit_stats(habit_id: str, habit_name: str, lang: str = DEFA
         "longest_streak": longest_streak,
         "last_completion": last_completion,
     }
+
+
+async def generate_habit_chart(habit_id: str, days: int = 30, lang: str = DEFAULT_LANGUAGE) -> Optional[io.BytesIO]:
+    """Generate a chart for a habit's progress."""
+    _ = get_translation(lang)
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("SELECT name FROM habits WHERE id = ?", (habit_id,))
+        habit = await cursor.fetchone()
+        if not habit:
+            return None
+        habit_name = habit[0]
+
+        start_date = datetime.now() - timedelta(days=days)
+        cursor = await db.execute(
+            "SELECT completed_at FROM completions WHERE habit_id = ? AND completed_at >= ?",
+            (habit_id, start_date.isoformat())
+        )
+        completions = await cursor.fetchall()
+
+    date_range = []
+    completion_data = []
+    current_date = start_date.date()
+    end_date = datetime.now().date()
+    completion_dates = {datetime.fromisoformat(c[0]).date() for c in completions}
+
+    while current_date <= end_date:
+        date_range.append(current_date)
+        completion_data.append(1 if current_date in completion_dates else 0)
+        current_date += timedelta(days=1)
+
+    plt.figure(figsize=(10, 5))
+    colors = ["#4CAF50" if x else "#f44336" for x in completion_data]
+    plt.bar(date_range, completion_data, color=colors, alpha=0.7)
+    plt.title(_("Progress for {}").format(habit_name), fontsize=14, pad=10)
+    plt.xlabel(_("Date"))
+    plt.ylabel(_("Completion"))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%d/%m"))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=max(1, days // 10)))
+    plt.xticks(rotation=45)
+    plt.yticks([0, 1], ["❌", "✅"])
+    plt.grid(True, alpha=0.3)
+    total_completions = sum(completion_data)
+    completion_rate = (total_completions / len(completion_data)) * 100
+    plt.text(0.02, 0.98, _("Completed: {}/{} days ({:.1f}%)").format(
+        total_completions, len(completion_data), completion_rate),
+             transform=plt.gca().transAxes, fontsize=10, verticalalignment="top",
+             bbox=dict(boxstyle="round", facecolor="white", alpha=0.8)
+             )
+    plt.tight_layout()
+
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format="PNG", dpi=200)
+    img_buffer.seek(0)
+    plt.close()
+    return img_buffer
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /start command."""
     user_id = update.effective_user.id
@@ -268,7 +330,6 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         reply_markup = get_main_menu_keyboard(lang)
         await update.message.reply_text(message, reply_markup=reply_markup)
         logger.info(f"Displayed main menu for user {user_id}")
-
 
 
 _translations: Dict[str, gettext.GNUTranslations] = {}
@@ -319,14 +380,16 @@ async def handle_language_selection(query: Update.callback_query, user_id: int, 
     await query.edit_message_text(message, reply_markup=reply_markup)
     logger.info(f"User {user_id} selected language: {new_lang}")
     # Debug: Log the translated main menu buttons
-    logger.info(f"Main menu buttons for {new_lang}: {[button.text for row in reply_markup.inline_keyboard for button in row]}")
+    logger.info(
+        f"Main menu buttons for {new_lang}: {[button.text for row in reply_markup.inline_keyboard for button in row]}")
+
 
 async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        """Handle /language command."""
-        user_id = update.effective_user.id
-        lang = await get_user_language(user_id)
-        _ = get_translation(lang)
-        message = _("🌐 Select your preferred language:")
-        reply_markup = get_language_keyboard()
-        await update.message.reply_text(message, reply_markup=reply_markup)
-        logger.info(f"Displayed language selection for user {user_id}")
+    """Handle /language command."""
+    user_id = update.effective_user.id
+    lang = await get_user_language(user_id)
+    _ = get_translation(lang)
+    message = _("🌐 Select your preferred language:")
+    reply_markup = get_language_keyboard()
+    await update.message.reply_text(message, reply_markup=reply_markup)
+    logger.info(f"Displayed language selection for user {user_id}")
