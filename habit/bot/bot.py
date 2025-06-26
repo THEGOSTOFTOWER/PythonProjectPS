@@ -300,3 +300,23 @@ def get_translation(lang: str) -> callable:
             "messages", "locale", languages=["en"], fallback=True
         )
     return _translations[lang].gettext
+
+
+async def handle_language_selection(query: Update.callback_query, user_id: int, lang: str) -> None:
+    """Handle language selection."""
+    _ = get_translation(lang)
+    new_lang = query.data.replace("lang_", "")
+    await set_user_language(user_id, new_lang)
+    # Force reload translation for new language
+    _ = get_translation(new_lang)  # Update translation
+    user_name = query.from_user.first_name or _("Friend")
+    message = _(
+        "🎯 Hello, {}! Language set to {}.\n\n"
+        "Track your habits with analytics and charts.\n"
+        "Choose an action:"
+    ).format(user_name, _("Русский") if new_lang == "ru" else _("English"))
+    reply_markup = get_main_menu_keyboard(new_lang)
+    await query.edit_message_text(message, reply_markup=reply_markup)
+    logger.info(f"User {user_id} selected language: {new_lang}")
+    # Debug: Log the translated main menu buttons
+    logger.info(f"Main menu buttons for {new_lang}: {[button.text for row in reply_markup.inline_keyboard for button in row]}")
