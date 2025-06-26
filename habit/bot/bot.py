@@ -152,3 +152,19 @@ async def get_habits_keyboard(lang: str = DEFAULT_LANGUAGE) -> Optional[InlineKe
     keyboard = [[InlineKeyboardButton(f"✅ {name}", callback_data=f"complete_{id}")] for id, name in habits]
     keyboard.append([InlineKeyboardButton(_("Main Menu"), id="main_menu")])
     return InlineKeyboardMarkup(keyboard)
+
+
+async def get_charts_keyboard(lang: Optional[str] = DEFAULT_LANGUAGE) -> Optional[InlineKeyboardButton]:
+    """Create keyboard for chart selection."""
+    _ = get_translation(lang)
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("SELECT id, name FROM habits WHERE is_active = 1")
+        habits = await cursor.fetchall()
+
+    if not habits:
+        return None
+
+    keyboard = [[InlineKeyboardButton(f"📈 {name}", callback_data=f"chart_{id}")] for id, name in habits]
+    keyboard.append([InlineKeyboardButton(_("Overview Chart"), callback_data="chart_all")])
+    keyboard.append([InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")])
+    return InlineKeyboardMarkup(keyboard)
