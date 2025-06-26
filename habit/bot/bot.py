@@ -731,3 +731,75 @@ async def create_habit_final_callback(query: Update.callback_query, user_id: int
     except Exception as e:
         logger.error(f"Error creating habit for user {user_id}: {e}")
         await query.edit_message_text(_("❌ Error creating habit: {}").format(str(e)))
+
+
+async def complete_habit(query: Update.callback_query, lang: str) -> None:
+    """Mark habit as completed."""
+    _ = get_translation(lang)
+    habit_id = query.data.replace("complete_", "")
+    try:
+        async with aiosqlite.connect(DB_PATH) as db:
+            cursor = await db.execute("SELECT name FROM habits WHERE id = ?", (habit_id,))
+            habit = await cursor.fetchone()
+            if not habit:
+                await query.edit_message_text(_("❌ Habit not found"))
+                return
+            habit_name = habit[0]
+
+            today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            today_end = today_start + timedelta(days=1)
+            cursor = await db.execute(
+                "SELECT 1 FROM completions WHERE habit_id = ? AND completed_at >= ? AND completed_at < ?",
+                (habit_id, today_start.isoformat(), today_end.isoformat())
+            )
+            completed_exists = await cursor.fetchone()
+
+            if completed_exists:
+                message = _(
+                    "✅ {} already completed today!\n\n"
+                    "⏰ Time: {}\n"
+                    "Keep it up!"
+                ).format(habit_name, datetime.now().strftime("%H:%M"))
+                keyboard = [[InlineKeyboardButton(_("Back to Habits"), callback_data="show_habits")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+                return
+
+            completion_dict = {
+                "id": str(uuid.uuid4()),
+                "habit_id": habit_id,
+                "completed_at": datetime.now().isoformat(),
+                "notes": _("Completed by {}").format(query.from_user.first_name or "user")
+            }
+            await db.execute(
+                """
+                INSERT INTO completions (id, habit_id, completed_at, notes)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    completion_dict["id"], completion_dict["habit_id"],
+                    completion_dict["completed_at"], completion_dict["notes"]
+                )
+            )
+            await db.commit()
+
+        stats = await calculate_habit_stats(habit_id, habit_name, lang)
+        message = _(
+            "🎉 {} completed!\n\n"
+            "⏰ Time: {}\n"
+            "🔥 Streak: {} days\n"
+            "🏆 Longest streak: {} days\n"
+            "📈 Total: {} times"
+        ).format(
+            habit_name, datetime.now().strftime("%H:%M"),
+            stats["current_streak"], stats["longest_streak"], stats["total_completions"]
+        )
+        keyboard = [
+            [InlineKeyboardButton(_("Back to Habits"), callback_data="show_habits")],
+            [InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+    except Exception as e:
+        logger.error(f"Error completing habit {habit_id}: {e}")
+        await query.edit_message_text(_("❌ Error: {}").format(str(e)))
