@@ -37,3 +37,13 @@ class TestHabitBotFunctions(unittest.IsolatedAsyncioTestCase):
         markup = await get_charts_keyboard("en")
         self.assertIsInstance(markup, InlineKeyboardMarkup)
         self.assertEqual(len(markup.inline_keyboard), 4)  # 2 привычки + 2 кнопки внизу
+
+    @patch("aiosqlite.connect")
+    async def test_get_charts_keyboard_returns_none_if_no_habits(self, mock_connect):
+        """Проверяет, что возвращается None, если нет активных привычек."""
+        mock_conn = AsyncMock()
+        mock_connect.return_value.__aenter__.return_value = mock_conn
+        mock_conn.execute.return_value.fetchall = AsyncMock(return_value=[])
+
+        result = await get_charts_keyboard("en")
+        self.assertIsNone(result)
