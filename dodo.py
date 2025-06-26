@@ -25,6 +25,7 @@ def task_mo():
     """Compile translations."""
     return {
             'actions': [
+                (create_folder, [f'{PODEST}/ru/LC_MESSAGES']),
                 f'pybabel compile -D messages -l ru -i {PODEST}/ru/LC_MESSAGES/messages.po -d {PODEST}'
                        ],
             'file_dep': [f'{PODEST}/ru/LC_MESSAGES/messages.po'],
