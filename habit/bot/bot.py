@@ -616,3 +616,15 @@ async def handle_frequency_selection(query: Update.callback_query, user_id: int,
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+
+
+
+async def skip_description(query: Update.callback_query, user_id: int, lang: str) -> None:
+    """Skip description step."""
+    _ = get_translation(lang)
+    if user_id not in user_states:
+        return
+    state = user_states[user_id]
+    state["description"] = ""
+    await create_habit_final_callback(query, user_id, lang)
+
