@@ -579,3 +579,10 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
         ).format(text)
         reply_markup = get_frequency_keyboard(lang)
         await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+
+    elif state["step"] == "description":
+        if len(text) > 500:
+            await update.message.reply_text(_("❌ Description too long (max 500 chars). Try again:"))
+            return
+        state["description"] = text
+        await create_habit_final(update, user_id, lang)
