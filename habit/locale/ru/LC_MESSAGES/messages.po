@@ -1,0 +1,498 @@
+# Russian translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-06-26 23:14+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: habit/bot/__init__.py:116 habit/bot/__init__.py:660
+#: habit/bot/__init__.py:712
+msgid "My Habits"
+msgstr "📋 Мои привычки"
+
+#: habit/bot/__init__.py:117
+msgid "Create Habit"
+msgstr "➕ Создать привычку"
+
+#: habit/bot/__init__.py:120
+msgid "Statistics"
+msgstr "📊 Статистика"
+
+#: habit/bot/__init__.py:121
+msgid "Charts"
+msgstr "📈 Графики"
+
+#: habit/bot/__init__.py:123
+msgid "Help"
+msgstr "❓ Помощь"
+
+#: habit/bot/__init__.py:143
+msgid "Daily"
+msgstr "📅 Ежедневно"
+
+#: habit/bot/__init__.py:144
+msgid "Weekly"
+msgstr "🗓️ Еженедельно"
+
+#: habit/bot/__init__.py:145
+msgid "Monthly"
+msgstr "📆 Ежемесячно"
+
+#: habit/bot/__init__.py:146 habit/bot/__init__.py:541
+#: habit/bot/__init__.py:603
+msgid "Cancel"
+msgstr "❌ Отмена"
+
+#: habit/bot/__init__.py:162 habit/bot/__init__.py:178
+#: habit/bot/__init__.py:504 habit/bot/__init__.py:661
+#: habit/bot/__init__.py:713 habit/bot/__init__.py:786
+#: habit/bot/__init__.py:805 habit/bot/__init__.py:842
+#: habit/bot/__init__.py:859 habit/bot/__init__.py:935
+msgid "Main Menu"
+msgstr "🏠 Главное меню"
+
+#: habit/bot/__init__.py:177
+msgid "Overview Chart"
+msgstr "👁️ Общий график"
+
+#: habit/bot/__init__.py:287
+#, python-brace-format
+msgid "Progress for {}"
+msgstr "📊 Прогресс для {}"
+
+#: habit/bot/__init__.py:288
+msgid "Date"
+msgstr "📅 Дата"
+
+#: habit/bot/__init__.py:289
+msgid "Completion"
+msgstr "✅ Выполнение"
+
+#: habit/bot/__init__.py:297
+#, python-brace-format
+msgid "Completed: {}/{} days ({:.1f}%)"
+msgstr "✅ Выполнено: {}/{} дней ({:.1f}%)"
+
+#: habit/bot/__init__.py:333
+msgid "Completion Rate (30 days)"
+msgstr "📶 Процент выполнения (30 дней)"
+
+#: habit/bot/__init__.py:334
+msgid "Percentage (%)"
+msgstr "📊 Процент (%)"
+
+#: habit/bot/__init__.py:341
+msgid "Current Streaks"
+msgstr "🔥 Текущая серия"
+
+#: habit/bot/__init__.py:342
+msgid "Days"
+msgstr "📅 Дней"
+
+#: habit/bot/__init__.py:368
+msgid ""
+"🌐 Welcome to Habit Tracker!\n"
+"\n"
+"Please select your preferred language:"
+msgstr ""
+"🌐 Добро пожаловать в Habit Tracker!\n"
+"\n"
+"Выберите предпочитаемый язык:"
+
+#: habit/bot/__init__.py:375 habit/bot/__init__.py:422
+msgid "Friend"
+msgstr "👋 Друг"
+
+#: habit/bot/__init__.py:377
+#, python-brace-format
+msgid ""
+"🎯 Hello, {}! Welcome to Habit Tracker!\n"
+"\n"
+"Track your habits with analytics and charts.\n"
+"Choose an action:"
+msgstr ""
+"🎯 Привет, {}! Добро пожаловать в Habit Tracker!\n"
+"\n"
+"Отслеживайте свои привычки с аналитикой и графиками.\n"
+"Выберите действие:"
+
+#: habit/bot/__init__.py:424
+#, python-brace-format
+msgid ""
+"🎯 Hello, {}! Language set to {}.\n"
+"\n"
+"Track your habits with analytics and charts.\n"
+"Choose an action:"
+msgstr ""
+"🎯 Привет, {}! Язык изменен на {}.\n"
+"\n"
+"Отслеживайте свои привычки с аналитикой и графиками.\n"
+"Выберите действие:"
+
+#: habit/bot/__init__.py:433
+msgid "Welcome to Habit Tracker!"
+msgstr "🎯 Добро пожаловать в Habit Tracker!"
+
+#: habit/bot/__init__.py:441
+msgid "🌐 Select your preferred language:"
+msgstr "🌐 Выберите предпочитаемый язык:"
+
+#: habit/bot/__init__.py:482 habit/bot/__init__.py:792
+#: habit/bot/__init__.py:847 habit/bot/__init__.py:913
+#, python-brace-format
+msgid "❌ Error: {}"
+msgstr "❌ Ошибка: {}"
+
+#: habit/bot/__init__.py:488
+msgid ""
+"🎯 Habit Tracker - Main Menu\n"
+"\n"
+"Choose an action:"
+msgstr ""
+"🎯 Habit Tracker - Главное меню\n"
+"\n"
+"Выберите действие:"
+
+#: habit/bot/__init__.py:503
+msgid ""
+"📝 No active habits.\n"
+"\n"
+"Create your first habit!"
+msgstr ""
+"📝 Нет активных привычек.\n"
+"\n"
+"Создайте свою первую привычку!"
+
+#: habit/bot/__init__.py:509
+msgid ""
+"📋 Your active habits:\n"
+"\n"
+msgstr ""
+"📋 Ваши активные привычки:\n"
+"\n"
+
+#: habit/bot/__init__.py:525
+msgid "Created"
+msgstr "📅 Создана"
+
+#: habit/bot/__init__.py:527
+msgid "Click a habit to mark it as completed:"
+msgstr "Нажмите на привычку, чтобы отметить выполнение:"
+
+#: habit/bot/__init__.py:537
+msgid ""
+"➕ Create a new habit\n"
+"\n"
+"📖 **Step 1/3**: Enter the habit name\n"
+"\n"
+"Examples:\n"
+"• Morning exercise\n"
+"• Reading\n"
+"• Meditation"
+msgstr ""
+"➕ Создать новую привычку\n"
+"\n"
+"📖 **Шаг 1/3**: Введите название привычки\n"
+"\n"
+"Примеры:\n"
+"• Утренняя зарядка\n"
+"• Чтение\n"
+"• Медитация"
+
+#: habit/bot/__init__.py:559
+msgid "❌ Name too long (max 100 chars). Try again:"
+msgstr "❌ Название слишком длинное (макс. 100 символов). Попробуйте снова:"
+
+#: habit/bot/__init__.py:564
+#, python-brace-format
+msgid ""
+"✅ Name: {}\n"
+"\n"
+"📖 **Step 2/3**: Choose the frequency:"
+msgstr ""
+"✅ Название: {}\n"
+"\n"
+"📖 **Шаг 2/3**: Выберите периодичность:"
+
+#: habit/bot/__init__.py:572
+msgid "❌ Description too long (max 500 chars). Try again:"
+msgstr "❌ Описание слишком длинное (макс. 500 символов). Попробуйте снова:"
+
+#: habit/bot/__init__.py:597
+#, python-brace-format
+msgid ""
+"✅ Name: {}\n"
+"✅ Frequency: {}\n"
+"\n"
+"📖 **Step 3/3**: Enter a description (optional)"
+msgstr ""
+"✅ Название: {}\n"
+"✅ Периодичность: {}\n"
+"\n"
+"📖 **Шаг 3/3**: Введите описание (необязательно)"
+
+#: habit/bot/__init__.py:602
+msgid "Skip"
+msgstr "⏭ Пропустить"
+
+#: habit/bot/__init__.py:649 habit/bot/__init__.py:701
+#, python-brace-format
+msgid ""
+"🎉 Habit created!\n"
+"\n"
+"✅ Name: {}\n"
+"✅ Description: {}\n"
+"✅ Frequency: {}\n"
+"\n"
+"Start tracking now!"
+msgstr ""
+"🎉 Привычка создана!\n"
+"\n"
+"✅ Название: {}\n"
+"✅ Описание: {}\n"
+"✅ Периодичность: {}\n"
+"\n"
+"Начните отслеживать сейчас!"
+
+#: habit/bot/__init__.py:656 habit/bot/__init__.py:708
+msgid "None"
+msgstr "❌ Нет"
+
+#: habit/bot/__init__.py:657 habit/bot/__init__.py:709
+msgid "frequency"
+msgstr "🔄 периодичность"
+
+#: habit/bot/__init__.py:668 habit/bot/__init__.py:720
+#, python-brace-format
+msgid "❌ Error creating habit: {}"
+msgstr "❌ Ошибка при создании привычки: {}"
+
+#: habit/bot/__init__.py:732 habit/bot/__init__.py:888
+msgid "❌ Habit not found"
+msgstr "❌ Привычка не найдена"
+
+#: habit/bot/__init__.py:746
+#, python-brace-format
+msgid ""
+"✅ {} already completed today!\n"
+"\n"
+"⏰ Time: {}\n"
+"Keep it up!"
+msgstr ""
+"✅ {} уже выполнена сегодня!\n"
+"\n"
+"⏰ Время: {}\n"
+"Так держать!"
+
+#: habit/bot/__init__.py:750 habit/bot/__init__.py:785
+msgid "Back to Habits"
+msgstr "↩️ К списку привычек"
+
+#: habit/bot/__init__.py:759
+#, python-brace-format
+msgid "Completed by {}"
+msgstr "✅ Выполнено пользователем {}"
+
+#: habit/bot/__init__.py:775
+#, python-brace-format
+msgid ""
+"🎉 {} completed!\n"
+"\n"
+"⏰ Time: {}\n"
+"🔥 Streak: {} days\n"
+"🏆 Longest streak: {} days\n"
+"📈 Total: {} times"
+msgstr ""
+"🎉 {} выполнено!\n"
+"\n"
+"⏰ Время: {}\n"
+"🔥 Серия: {} дней\n"
+"🏆 Рекорд: {} дней\n"
+"📈 Всего: {} раз"
+
+#: habit/bot/__init__.py:804
+msgid ""
+"📊 No habits available.\n"
+"\n"
+"Create your first habit!"
+msgstr ""
+"📊 Нет доступных привычек.\n"
+"\n"
+"Создайте свою первую привычку!"
+
+#: habit/bot/__init__.py:810
+msgid ""
+"📊 Habit Statistics:\n"
+"\n"
+msgstr ""
+"📊 Статистика привычек:\n"
+"\n"
+
+#: habit/bot/__init__.py:826
+msgid "Completions"
+msgstr "✅ Выполнения"
+
+#: habit/bot/__init__.py:827
+msgid "Streak"
+msgstr "🔥 Серия"
+
+#: habit/bot/__init__.py:827 habit/bot/__init__.py:828
+#: habit/bot/__init__.py:829 habit/bot/__init__.py:840
+msgid "days"
+msgstr "дней"
+
+#: habit/bot/__init__.py:828
+msgid "Longest"
+msgstr "🏆 Рекорд"
+
+#: habit/bot/__init__.py:829
+msgid "Rate"
+msgstr "📈 Процент"
+
+#: habit/bot/__init__.py:831
+msgid "Last"
+msgstr "⏱ Последнее"
+
+#: habit/bot/__init__.py:836
+msgid "Overall"
+msgstr "📊 Общее"
+
+#: habit/bot/__init__.py:837
+msgid "Habits"
+msgstr "📋 Привычки"
+
+#: habit/bot/__init__.py:838
+msgid "Today"
+msgstr "📅 Сегодня"
+
+#: habit/bot/__init__.py:839
+msgid "Total"
+msgstr "📈 Всего"
+
+#: habit/bot/__init__.py:840
+msgid "Streaks"
+msgstr "🔥 Серии"
+
+#: habit/bot/__init__.py:858
+msgid ""
+"📈 No habits for charts.\n"
+"\n"
+"Create your first habit!"
+msgstr ""
+"📈 Нет привычек для графиков.\n"
+"\n"
+"Создайте свою первую привычку!"
+
+#: habit/bot/__init__.py:864
+msgid ""
+"📈 Progress Charts\n"
+"\n"
+"Select a habit or view overview:"
+msgstr ""
+"📈 Графики прогресса\n"
+"\n"
+"Выберите привычку или общий обзор:"
+
+#: habit/bot/__init__.py:878
+msgid ""
+"📊 Overview of all habits\n"
+"\n"
+"Shows completion rates and streaks."
+msgstr ""
+"📊 Обзор всех привычек\n"
+"\n"
+"Показывает процент выполнения и серии."
+
+#: habit/bot/__init__.py:881 habit/bot/__init__.py:906
+msgid "❌ Unable to generate chart"
+msgstr "❌ Не удалось создать график"
+
+#: habit/bot/__init__.py:895
+#, python-brace-format
+msgid ""
+"📈 Chart for {}\n"
+"\n"
+"✅ Completions: {}\n"
+"🔥 Streak: {} days\n"
+"🏆 Longest: {} days\n"
+"📈 Rate: {:.1f}%"
+msgstr ""
+"📈 График для {}\n"
+"\n"
+"✅ Выполнено: {} раз\n"
+"🔥 Серия: {} дней\n"
+"🏆 Рекорд: {} дней\n"
+"📈 Процент: {:.1f}%"
+
+#: habit/bot/__init__.py:908
+msgid "Back to Charts"
+msgstr "↩️ К графикам"
+
+#: habit/bot/__init__.py:910
+msgid "📈 Chart sent above"
+msgstr "📈 График отправлен выше"
+
+#: habit/bot/__init__.py:920
+msgid ""
+"🆘 Habit Tracker Help\n"
+"\n"
+"📖 Track habits with analytics and charts.\n"
+"\n"
+"🚀 Features:\n"
+"• Create habits\n"
+"• Track completions\n"
+"• View stats\n"
+"• Generate charts\n"
+"\n"
+"📱 Commands:\n"
+"/start - Start bot\n"
+"/language - Change language\n"
+"\n"
+"💡 Tips:\n"
+"• Mark habits daily\n"
+"• Use charts for motivation\n"
+"\n"
+"Good luck! 🚀"
+msgstr ""
+"🆘 Помощь по Habit Tracker\n"
+"\n"
+"📖 Отслеживайте привычки с аналитикой и графиками.\n"
+"\n"
+"🚀 Возможности:\n"
+"• Создавайте привычки\n"
+"• Отмечайте выполнение\n"
+"• Просматривайте статистику\n"
+"• Создавайте графики\n"
+"\n"
+"📱 Команды:\n"
+"/start - Запуск бота\n"
+"/language - Смена языка\n"
+"\n"
+"💡 Советы:\n"
+"• Отмечайте привычки ежедневно\n"
+"• Используйте графики для мотивации\n"
+"\n"
+"Удачи! 🚀"
+
+#: habit/bot/__init__.py:950
+msgid "❌ Bot error. Try again later."
+msgstr "❌ Ошибка бота. Попробуйте позже."
+
+#: habit/bot/__init__.py:956
+msgid "Starting bot..."
+msgstr "🚀 Запуск бота..."
+
