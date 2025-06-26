@@ -20,3 +20,14 @@ def task_po():
         'file_dep': [f'{PODEST}/messages.pot'],
         'targets': [f"{PODEST}/ru/LC_MESSAGES/messages.po"],
     }
+
+def task_mo():
+    """Compile translations."""
+    return {
+            'actions': [
+                f'pybabel compile -D messages -l ru -i {PODEST}/ru/LC_MESSAGES/messages.po -d {PODEST}'
+                       ],
+            'file_dep': [f'{PODEST}/ru/LC_MESSAGES/messages.po'],
+            'targets': [f'{PODEST}/ru/LC_MESSAGES/messages.mo'],
+            'task_dep': ['po']
+           }
