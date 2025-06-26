@@ -586,3 +586,33 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
             return
         state["description"] = text
         await create_habit_final(update, user_id, lang)
+
+async def handle_frequency_selection(query: Update.callback_query, user_id: int, lang: str) -> None:
+    """Handle frequency selection."""
+    _ = get_translation(lang)
+    if user_id not in user_states:
+        return
+
+    freq_map = {
+        "freq_daily": "daily",
+        "freq_weekly": "weekly",
+        "freq_monthly": "monthly"
+    }
+    frequency = freq_map.get(query.data)
+    if not frequency:
+        return
+
+    state = user_states[user_id]
+    state["frequency"] = frequency
+    state["step"] = "description"
+    message = _(
+        "✅ Name: {}\n"
+        "✅ Frequency: {}\n\n"
+        "📖 **Step 3/3**: Enter a description (optional)"
+    ).format(state["name"], _(frequency.capitalize()))
+    keyboard = [
+        [InlineKeyboardButton(_("Skip"), callback_data="skip_description")],
+        [InlineKeyboardButton(_("Cancel"), callback_data="main_menu")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
