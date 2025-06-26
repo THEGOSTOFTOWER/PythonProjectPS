@@ -127,3 +127,14 @@ def get_language_keyboard() -> InlineKeyboardMarkup:
     ]
     logger.info(f"Language keyboard created: {keyboard}")
     return InlineKeyboardMarkup(keyboard)
+
+def get_frequency_keyboard(lang: str = DEFAULT_LANGUAGE) -> InlineKeyboardMarkup:
+    """Create frequency selection keyboard."""
+    _ = get_translation(lang)
+    keyboard = [
+        [InlineKeyboardButton(_("Daily"), callback_data="freq_daily")],
+        [InlineKeyboardButton(_("Weekly"), callback_data="freq_weekly")],
+        [InlineKeyboardButton(_("Monthly"), callback_data="freq_monthly")],
+        [InlineKeyboardButton(_("Cancel"), callback_data="main_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
