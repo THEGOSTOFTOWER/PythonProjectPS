@@ -168,3 +168,29 @@ async def get_charts_keyboard(lang: Optional[str] = DEFAULT_LANGUAGE) -> Optiona
     keyboard.append([InlineKeyboardButton(_("Overview Chart"), callback_data="chart_all")])
     keyboard.append([InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")])
     return InlineKeyboardMarkup(keyboard)
+
+
+async def get_user_language(user_id: int) -> str:
+    """Retrieve user's language."""
+    try:
+        async with aiosqlite.connect(DB_PATH) as db:
+            cursor = await db.execute("SELECT language FROM users WHERE user_id = ?", (user_id,))
+            result = await cursor.fetchone()
+            return result[0] if result else DEFAULT_LANGUAGE
+    except Exception as e:
+        logger.error(f"Error retrieving language for user {user_id}: {e}")
+        return DEFAULT_LANGUAGE
+
+async def set_user_language(user_id: int, lang: str) -> None:
+    """Set user's language."""
+    try:
+        async with aiosqlite.connect(DB_PATH) as db:
+            await db.execute(
+                "INSERT OR REPLACE INTO users (user_id, language) VALUES (?, ?)",
+                (user_id, lang)
+            )
+            await db.commit()
+        logger.info(f"Set language for user {user_id} to {lang}")
+    except Exception as e:
+        logger.error(f"Error setting language for user {user_id}: {e}")
+
