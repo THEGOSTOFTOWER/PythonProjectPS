@@ -554,3 +554,28 @@ async def start_create_habit(query: Update.callback_query, user_id: int, lang: s
     keyboard = [[InlineKeyboardButton(_("Cancel"), callback_data="main_menu")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+
+
+async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle text messages during habit creation."""
+    user_id = update.effective_user.id
+    if user_id not in user_states:
+        return
+
+    state = user_states[user_id]
+    lang = state.get("lang", DEFAULT_LANGUAGE)
+    _ = get_translation(lang)
+    text = update.message.text.strip()
+
+    if state["step"] == "name":
+        if len(text) > 100:
+            await update.message.reply_text(_("❌ Name too long (max 100 chars). Try again:"))
+            return
+        state["name"] = text
+        state["step"] = "frequency"
+        message = _(
+            "✅ Name: {}\n\n"
+            "📖 **Step 2/3**: Choose the frequency:"
+        ).format(text)
+        reply_markup = get_frequency_keyboard(lang)
+        await update.message.reply_text(message, reply_markup=reply_markup, parse_mode="Markdown")
