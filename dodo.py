@@ -61,3 +61,15 @@ def task_wheel():
             'actions': ['python -m build -w'],
             'task_dep': ['html'],
            }
+
+def task_clean_all():
+    """Полная очистка (включая документацию и кэш)"""
+    return {
+        'actions': [
+            "rm -rf dist build *.egg-info",
+            f"rm -rf {PROJECT_DIR / '_build'}",
+            "find . -type d -name '__pycache__' -exec rm -rf {} +",
+            "find . -type f -name '*.pyc' -delete"
+        ],
+        'verbosity': 2,
+    }
