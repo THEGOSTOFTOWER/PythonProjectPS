@@ -8,3 +8,8 @@ PODEST = 'habit/locale'
 PROJECT_DIR = Path(__file__).parent
 
 
+def task_pot():
+    return {
+        'actions': [f'pybabel extract -o {PODEST}/messages.pot habit/bot'],
+        'targets': [f"{PODEST}/messages.pot"],
+    }
