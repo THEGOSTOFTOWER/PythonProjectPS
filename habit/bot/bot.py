@@ -679,3 +679,55 @@ async def create_habit_final(update: Update, user_id: int, lang: str) -> None:
     except Exception as e:
         logger.error(f"Error creating habit for user {user_id}: {e}")
         await update.message.reply_text(_("❌ Error creating habit: {}").format(str(e)))
+
+
+async def create_habit_final_callback(query: Update.callback_query, user_id: int, lang: str) -> None:
+    """Finalize habit creation from callback."""
+    _ = get_translation(lang)
+    try:
+        state = user_states[user_id]
+        habit_dict = {
+            "id": str(uuid.uuid4()),
+            "name": state["name"],
+            "description": state.get("description", ""),
+            "frequency": state["frequency"],
+            "goal": "",
+            "category": "",
+            "created_at": datetime.now().isoformat(),
+            "is_active": 1,
+        }
+        async with aiosqlite.connect(DB_PATH) as db:
+            await db.execute(
+                """
+                INSERT INTO habits (id, name, description, frequency, goal, category, created_at, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    habit_dict["id"], habit_dict["name"], habit_dict["description"],
+                    habit_dict["frequency"], habit_dict["goal"], habit_dict["category"],
+                    habit_dict["created_at"], habit_dict["is_active"]
+                )
+            )
+            await db.commit()
+
+        message = _(
+            "🎉 Habit created!\n\n"
+            "✅ Name: {}\n"
+            "✅ Description: {}\n"
+            "✅ Frequency: {}\n\n"
+            "Start tracking now!"
+        ).format(
+            state["name"],
+            state.get("description") or _("None"),
+            _(state["frequency"].capitalize())
+        )
+        keyboard = [
+            [InlineKeyboardButton(_("My Habits"), callback_data="show_habits")],
+            [InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+        del user_states[user_id]
+    except Exception as e:
+        logger.error(f"Error creating habit for user {user_id}: {e}")
+        await query.edit_message_text(_("❌ Error creating habit: {}").format(str(e)))
