@@ -1,0 +1,5 @@
+*.db
+*.mo
+*.pot
+*.idea/
+*.DS_Store
