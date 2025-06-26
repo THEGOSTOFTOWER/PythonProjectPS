@@ -948,3 +948,16 @@ async def show_help(query: Update.callback_query, lang: str) -> None:
     keyboard = [[InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+
+
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle errors."""
+    logger.error(f"Update {update} caused error: {context.error}")
+    if isinstance(context.error, BadRequest) and "stranded" in str(context.error).lower():
+        logger.info("Ignoring old callback query")
+        return
+    if isinstance(context.error, TelegramError):
+        logger.error(f"Telegram API error: {context.error}")
+    if update and update.effective_message:
+        _ = get_translation(DEFAULT_LANGUAGE)
+        await update.effective_message.reply_text(_("❌ Bot error. Try again later."))
