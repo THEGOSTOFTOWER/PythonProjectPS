@@ -1,14 +1,16 @@
-#!/usr/bin/env python3
 """
-Advanced Telegram bot for Habit Tracker with charts and language selection.
+Telegram bot for Habit Tracker with charts and language selection.
+
+Authors: Kirnev Iurii and Vargin Artem
 """
+
 import asyncio
-import os
 import sys
 import io
 import logging
+from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 import uuid
 import gettext
 import matplotlib
@@ -25,7 +27,6 @@ from telegram.ext import (
     filters,
     ContextTypes,
 )
-
 from telegram.error import BadRequest, TelegramError
 from dotenv import load_dotenv
 import aiosqlite
@@ -37,14 +38,19 @@ logging.basicConfig(
     handlers=[logging.FileHandler("bot.log"), logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.CRITICAL)
 
 # Load environment variables
 load_dotenv()
 
 # Configuration
-TELEGRAM_BOT_TOKEN: Optional[str] = os.getenv("TELEGRAM_BOT_TOKEN")
-DB_PATH: str = os.getenv("DB_PATH", "habits.db")
-DEFAULT_LANGUAGE: str = os.getenv("BOT_LANGUAGE", "ru")
+TELEGRAM_BOT_TOKEN = '7648041706:AAHC30DqMZ5XKCGpXin3m10dDtcMFYCeG_Y'
+
+DB_PATH = 'habits.db'
+
+DEFAULT_LANGUAGE = 'ru'
+
+BASE_DIR = Path(__file__).parent.parent
 
 if not TELEGRAM_BOT_TOKEN:
     logger.error("❌ TELEGRAM_BOT_TOKEN not found")
@@ -83,19 +89,19 @@ async def init_db() -> None:
                 )
                 """
             )
-        await conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                user_id INTEGER PRIMARY KEY,
-                language TEXT NOT NULL DEFAULT 'ru'
+            await conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS users (
+                    user_id INTEGER PRIMARY KEY,
+                    language TEXT NOT NULL DEFAULT 'ru'
+                )
+                """
             )
-            """
-        )
-        await conn.commit()
-    logger.info("SQLite database initialized")
+            await conn.commit()
+        logger.info("SQLite database initialized")
     except Exception as e:
-    logger.error(f"Database initialization failed: {e}")
-    raise
+        logger.error(f"Database initialization failed: {e}")
+        raise
 
 
 # Global state for habit creation
@@ -153,11 +159,11 @@ async def get_habits_keyboard(lang: str = DEFAULT_LANGUAGE) -> Optional[InlineKe
         return None
 
     keyboard = [[InlineKeyboardButton(f"✅ {name}", callback_data=f"complete_{id}")] for id, name in habits]
-    keyboard.append([InlineKeyboardButton(_("Main Menu"), id="main_menu")])
+    keyboard.append([InlineKeyboardButton(_("Main Menu"), callback_data="main_menu")])
     return InlineKeyboardMarkup(keyboard)
 
 
-async def get_charts_keyboard(lang: Optional[str] = DEFAULT_LANGUAGE) -> Optional[InlineKeyboardButton]:
+async def get_charts_keyboard(lang: Optional[str] = DEFAULT_LANGUAGE) -> Optional[InlineKeyboardMarkup]:
     """Create keyboard for chart selection."""
     _ = get_translation(lang)
     async with aiosqlite.connect(DB_PATH) as db:
@@ -390,43 +396,41 @@ def get_translation(lang: str) -> callable:
     try:
         logger.info(f"Attempting to load translation for language: {lang}")
         _translations[lang] = gettext.translation(
-            "messages", "locale", languages=[lang]
+            "messages", f"{BASE_DIR}/locale", languages=[lang]
         )
         logger.info(f"Successfully loaded translation for {lang}")
     except FileNotFoundError as e:
         logger.error(f"Translation file for {lang} not found: {e}")
         logger.warning(f"Falling back to English for language: {lang}")
         _translations[lang] = gettext.translation(
-            "messages", "locale", languages=["en"], fallback=True
+            "messages", f"{BASE_DIR}/locale", languages=["en"], fallback=True
         )
     except Exception as e:
         logger.error(f"Error loading translation for {lang}: {e}")
         logger.warning(f"Falling back to English for language: {lang}")
         _translations[lang] = gettext.translation(
-            "messages", "locale", languages=["en"], fallback=True
+            "messages", f"{BASE_DIR}/locale", languages=["en"], fallback=True
         )
     return _translations[lang].gettext
 
 
 async def handle_language_selection(query: Update.callback_query, user_id: int, lang: str) -> None:
     """Handle language selection."""
-    _ = get_translation(lang)
     new_lang = query.data.replace("lang_", "")
     await set_user_language(user_id, new_lang)
-    # Force reload translation for new language
-    _ = get_translation(new_lang)  # Update translation
+    _ = get_translation(new_lang)  # Force reload translation
     user_name = query.from_user.first_name or _("Friend")
     message = _(
         "🎯 Hello, {}! Language set to {}.\n\n"
         "Track your habits with analytics and charts.\n"
         "Choose an action:"
-    ).format(user_name, _("Русский") if new_lang == "ru" else _("English"))
+    ).format(user_name, "Русский" if new_lang == "ru" else "English")
     reply_markup = get_main_menu_keyboard(new_lang)
     await query.edit_message_text(message, reply_markup=reply_markup)
     logger.info(f"User {user_id} selected language: {new_lang}")
-    # Debug: Log the translated main menu buttons
     logger.info(
         f"Main menu buttons for {new_lang}: {[button.text for row in reply_markup.inline_keyboard for button in row]}")
+    logger.info(f"Test translation for 'Welcome to Habit Tracker!': {_('Welcome to Habit Tracker!')}")
 
 
 async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -476,23 +480,6 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     except Exception as e:
         logger.error(f"Error in button_callback: {e}")
         await query.message.reply_text(_("❌ Error: {}").format(str(e)))
-
-
-async def handle_language_selection(query: Update.callback_query, user_id: int, lang: str) -> None:
-    """Handle language selection."""
-    _ = get_translation(lang)
-    new_lang = query.data.replace("lang_", "")
-    await set_user_language(user_id, new_lang)
-    _ = get_translation(new_lang)  # Update translation
-    user_name = query.from_user.first_name or _("Friend")
-    message = _(
-        "🎯 Hello, {}! Language set to {}.\n\n"
-        "Track your habits with analytics and charts.\n"
-        "Choose an action:"
-    ).format(user_name, _("English") if new_lang == "en" else _("Русский"))
-    reply_markup = get_main_menu_keyboard(new_lang)
-    await query.edit_message_text(message, reply_markup=reply_markup)
-    logger.info(f"User {user_id} selected language: {new_lang}")
 
 
 async def show_main_menu(query: Update.callback_query, lang: str) -> None:
@@ -962,8 +949,9 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         _ = get_translation(DEFAULT_LANGUAGE)
         await update.effective_message.reply_text(_("❌ Bot error. Try again later."))
 
+
 async def main() -> None:
-    """Main function to run the bot."""
+    """Run main function in the bot."""
     _ = get_translation(DEFAULT_LANGUAGE)
     logger.info(_("Starting bot..."))
     try:
@@ -984,7 +972,7 @@ async def main() -> None:
             await application.updater.start_polling(
                 drop_pending_updates=True,
                 allowed_updates=Update.ALL_TYPES,
-                timeout=30
+                timeout=200
             )
             logger.info("Bot polling started successfully")
             # Keep the application running
@@ -1006,7 +994,9 @@ async def main() -> None:
         logger.error(f"Failed to run bot: {e}")
         raise
 
-if __name__ == "__main__":
+
+def run_bot():
+    """Initialize bot."""
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
