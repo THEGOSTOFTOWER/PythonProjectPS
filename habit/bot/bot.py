@@ -302,6 +302,51 @@ async def generate_habit_chart(habit_id: str, days: int = 30, lang: str = DEFAUL
     return img_buffer
 
 
+async def generate_overview_chart(lang: str = DEFAULT_LANGUAGE) -> Optional[io.BytesIO]:
+    """Generate overview chart for all habits."""
+    _ = get_translation(lang)
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("SELECT id, name FROM habits WHERE is_active = 1")
+        habits = await cursor.fetchall()
+
+    if not habits:
+        return None
+
+    habit_names = []
+    completion_rates = []
+    current_streaks = []
+
+    for habit_id, name in habits:
+        stats = await calculate_habit_stats(habit_id, name, lang)
+        habit_names.append(name[:15] + "..." if len(name) > 15 else name)
+        completion_rates.append(stats["completion_rate"])
+        current_streaks.append(stats["current_streak"])
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    ax1.bar(habit_names, completion_rates, color="#2196F3", alpha=0.7)
+    ax1.set_title(_("Completion Rate (30 days)"))
+    ax1.set_ylabel(_("Percentage (%)"))
+    ax1.set_ylim(0, 100)
+    ax1.tick_params(axis="x", rotation=45)
+    for i, rate in enumerate(completion_rates):
+        ax1.text(i, rate + 2, f"{rate:.1f}%", ha="center", fontsize=8)
+
+    ax2.bar(habit_names, current_streaks, color="#FF9800", alpha=0.7)
+    ax2.set_title(_("Current Streaks"))
+    ax2.set_ylabel(_("Days"))
+    ax2.tick_params(axis="x", rotation=45)
+    for i, streak in enumerate(current_streaks):
+        if streak > 0:
+            ax2.text(i, streak + 0.5, f"{streak}", ha="center", fontsize=8)
+
+    plt.tight_layout()
+    img_buffer = io.BytesIO()
+    plt.savefig(img_buffer, format="PNG", dpi=200)
+    img_buffer.seek(0)
+    plt.close()
+    return img_buffer
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /start command."""
     user_id = update.effective_user.id
